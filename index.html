@@ -408,77 +408,120 @@
     });
 
     // LOGIN
-    document.getElementById("loginBtn").addEventListener("click", () => {
-      const email = document.getElementById("loginEmail").value.trim();
-      const password = document.getElementById("loginPassword").value;
+    // LOGIN
+document.getElementById("loginBtn").addEventListener("click", () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
 
-      if (!email || !password) {
-        alert("Please enter both email and password.");
-        return;
-      }
+  if (!email || !password) {
+    alert("Please enter both email and password.");
+    return;
+  }
 
-      const storedPassword = localStorage.getItem(`password_${email}`);
-      if (!storedPassword) {
-        alert("User not found. Please sign up first.");
-        return;
-      }
-      if (storedPassword !== password) {
-        alert("Incorrect password.");
-        return;
-      }
+  signInWithEmailAndPassword(auth, email, password)
 
-      // Successful login
-      currentUser = email;
-      localStorage.setItem("username", currentUser);
+    .then((userCredential) => {
+      currentUser = userCredential.user.email;
+      localStorage.setItem("username", currentUser); // still needed for subject storage unless moved to Firebase DB
       subjects = getUserSubjects(currentUser);
       greeting.textContent = `Welcome, ${currentUser}!`;
       showView(mainView);
       renderSubjects();
-
-      // Clear login inputs
-      document.getElementById("loginEmail").value = "";
-      document.getElementById("loginPassword").value = "";
+    })
+    .catch((error) => {
+      alert("Login failed: " + error.message);
     });
+});
+
 
     // SIGNUP
     document.getElementById("signupBtn").addEventListener("click", () => {
-      const email = document.getElementById("signupEmail").value.trim();
-      const password = document.getElementById("signupPassword").value;
+     const email = document.getElementById("signupEmail").value.trim();
+    const password = document.getElementById("signupPassword").value;
 
-      if (!email || !password) {
-        alert("Please enter both email and password.");
-        return;
-      }
-      if (localStorage.getItem(`password_${email}`)) {
-        alert("User already exists. Please login.");
-        return;
-      }
-      localStorage.setItem(`password_${email}`, password);
+     if (!email || !password) {
+     alert("Please enter both email and password.");
+     return;
+    }
+
+    createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
       alert("Registration successful! Please login now.");
       showView(loginView);
+    })
+    .catch((error) => {
+      if (error.code === "auth/email-already-in-use") {
+  alert("This email is already registered. Try logging in instead.");
+} else {
+  alert("Error: " + error.message);
+}
 
-      // Clear signup inputs
-      document.getElementById("signupEmail").value = "";
-      document.getElementById("signupPassword").value = "";
     });
+   });
+
 
     // LOGOUT
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      localStorage.removeItem("username");
-      currentUser = null;
-      subjects = [];
-      showView(loginView);
-    });
+     document.getElementById("logoutBtn").addEventListener("click", () => {
+    signOut(auth).then(() => {
+    localStorage.removeItem("username");
+    currentUser = null;
+    subjects = [];
+    showView(loginView);
+  });
+});
+
 
     // On page load, check if user is logged in
-    if (currentUser) {
-      subjects = getUserSubjects(currentUser);
-      greeting.textContent = `Welcome, ${currentUser}!`;
-      showView(mainView);
-      renderSubjects();
-    } else {
-      showView(loginView);
-    }
+    onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUser = user.email;
+    localStorage.setItem("username", currentUser);
+    subjects = getUserSubjects(currentUser);
+    greeting.textContent = `Welcome, ${currentUser}!`;
+    showView(mainView);
+    renderSubjects();
+  } else {
+    showView(loginView);
+  }
+});
+
+
+    
   </script>
+  
+  <script type="module">
+  // Import the functions you need from the SDKs
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+  import {
+    getAuth,
+    onAuthStateChanged,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyBIAclpFBe5yBKrnCDueWIGMybRry1petU",
+    authDomain: "attendance-tracker-5ae43.firebaseapp.com",
+    projectId: "attendance-tracker-5ae43",
+    storageBucket: "attendance-tracker-5ae43.appspot.com",  // fixed `.app` typo
+    messagingSenderId: "710590047788",
+    appId: "1:710590047788:web:45279be44a5e288d789389"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // Expose auth to global scope so your main script can use it
+  window.auth = auth;
+  window.onAuthStateChanged = onAuthStateChanged;
+  window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+  window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+  window.signOut = signOut;
+</script>
+
+
 </body>
 </html>
