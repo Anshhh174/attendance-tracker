@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Attendance Tracker - SPA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    /* Reset and base */
+    * {
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #2c3e50;
+    }
+    .container {
+      background: #fff;
+      padding: 40px 35px 50px;
+      border-radius: 18px;
+      width: 90%;
+      max-width: 480px;
+      box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
+      animation: fadeIn 0.6s ease-in-out;
+    }
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+    }
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 14px 18px;
+      margin: 14px 0;
+      border-radius: 12px;
+      border: 2px solid #d1d8e0;
+      font-size: 1.1em;
+      font-weight: 500;
+      color: #34495e;
+      box-shadow: inset 2px 2px 5px rgba(0,0,0,0.05);
+    }
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 8px #667eea;
+      outline: none;
+    }
+    button {
+      cursor: pointer;
+      user-select: none;
+      border: none;
+      border-radius: 14px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 15px rgba(102, 126, 234, 0.6);
+      color: white;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.9);
+    }
+
+    /* Specific buttons */
+    #loginBtn, #signupBtn, #addSubjectBtn {
+      width: 100%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      padding: 14px;
+      font-size: 1.15em;
+      margin-top: 25px;
+    }
+    #logoutBtn {
+      width: auto;
+      float: right;
+      margin-bottom: 15px;
+      background: #f39c12;
+      box-shadow: 0 5px 15px rgba(243, 156, 18, 0.7);
+      padding: 10px 22px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      border-radius: 12px;
+    }
+    #logoutBtn:hover {
+      box-shadow: 0 8px 30px rgba(243, 156, 18, 1);
+    }
+    .link {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 1em;
+      color: #764ba2;
+      text-decoration: underline;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 600;
+      letter-spacing: 0.7px;
+    }
+    .subject-form {
+      margin-top: 30px;
+      display: flex;
+      gap: 15px;
+    }
+    .subject-form input {
+      flex-grow: 1;
+      margin: 0;
+      font-size: 1.1em;
+      font-weight: 500;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 2px solid #d1d8e0;
+      box-shadow: inset 2px 2px 6px rgba(0,0,0,0.05);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .subject-form input:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 10px #667eea;
+      outline: none;
+    }
+    .subjects {
+      margin-top: 28px;
+    }
+    .subject {
+      margin: 12px 0;
+      padding: 15px 20px;
+      border-radius: 16px;
+      background: #f6f8fc;
+      box-shadow: 0 5px 15px rgba(118, 75, 162, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: box-shadow 0.3s ease;
+    }
+    .subject:hover {
+      box-shadow: 0 10px 30px rgba(118, 75, 162, 0.15);
+    }
+    .subject h3 {
+      margin: 0;
+      font-weight: 700;
+      font-size: 1.25em;
+      color: #5b2e7e;
+      letter-spacing: 0.7px;
+    }
+    .subject p {
+      font-weight: 600;
+      color: #34495e;
+      margin: 0 0 10px;
+      font-size: 1em;
+    }
+
+    /* Attendance buttons */
+    .btn-group {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-attendance {
+      width: 36px;
+      height: 36px;
+      font-size: 24px;
+      line-height: 0;
+      padding: 0;
+      border-radius: 50%;
+      font-weight: 700;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+    .btn-attendance.present {
+      background-color: #27ae60;
+      box-shadow: 0 6px 12px rgba(39, 174, 96, 0.6);
+    }
+    .btn-attendance.present:hover {
+      box-shadow: 0 10px 20px rgba(39, 174, 96, 0.85);
+      transform: translateY(-2px);
+    }
+    .btn-attendance.absent {
+      background-color: #c0392b;
+      box-shadow: 0 6px 12px rgba(192, 57, 43, 0.6);
+    }
+    .btn-attendance.absent:hover {
+      box-shadow: 0 10px 20px rgba(192, 57, 43, 0.85);
+      transform: translateY(-2px);
+    }
+    .btn-attendance.delete {
+      background-color: #7f8c8d;
+      box-shadow: 0 6px 12px rgba(127, 140, 141, 0.6);
+    }
+    .btn-attendance.delete:hover {
+      box-shadow: 0 10px 20px rgba(127, 140, 141, 0.85);
+      transform: translateY(-2px);
+    }
+
+    /* Responsive */
+    @media (max-width: 520px) {
+      .container {
+        padding: 30px 20px 40px;
+      }
+      .subject-form {
+        flex-direction: column;
+      }
+      .subject-form input, .subject-form button {
+        width: 100%;
+        margin-top: 10px;
+      }
+      #logoutBtn {
+        float: none;
+        display: block;
+        margin: 0 0 15px 0;
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- LOGIN VIEW -->
+  <div class="container" id="loginView">
+    <h2>Login</h2>
+    <input type="text" id="loginEmail" placeholder="Email" autocomplete="username" />
+    <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" />
+    <button id="loginBtn">Login</button>
+    <div class="link" id="goToSignup">New user? Sign Up</div>
+  </div>
+
+  <!-- SIGNUP VIEW -->
+  <div class="container" id="signupView" style="display:none;">
+    <h2>Sign Up</h2>
+    <input type="text" id="signupEmail" placeholder="Email" autocomplete="username" />
+    <input type="password" id="signupPassword" placeholder="Password" autocomplete="new-password" />
+    <button id="signupBtn">Register</button>
+    <div class="link" id="goToLogin">Already have an account? Login</div>
+  </div>
+
+  <!-- MAIN ATTENDANCE VIEW -->
+  <div class="container" id="mainView" style="display:none; max-width: 650px;">
+    <button id="logoutBtn">Logout</button>
+    <h1>Attendance Tracker</h1>
+    <div id="greeting"></div>
+    <div class="subject-form">
+      <input type="text" id="subjectInput" placeholder="Enter subject name" />
+      <button id="addSubjectBtn">Add Subject</button>
+    </div>
+    <div class="subjects" id="subjects"></div>
+  </div>
+
+  <script>
+    // Elements
+    const loginView = document.getElementById("loginView");
+    const signupView = document.getElementById("signupView");
+    const mainView = document.getElementById("mainView");
+    const greeting = document.getElementById("greeting");
+
+    // Show views
+    function showView(view) {
+      loginView.style.display = "none";
+      signupView.style.display = "none";
+      mainView.style.display = "none";
+      view.style.display = "block";
+    }
+
+    // Navigation links
+    document.getElementById("goToSignup").addEventListener("click", () => showView(signupView));
+    document.getElementById("goToLogin").addEventListener("click", () => showView(loginView));
+
+    // User data
+    let currentUser = localStorage.getItem("username");
+    let subjects = [];
+
+    // Utils
+    function getUserSubjects(email) {
+      return JSON.parse(localStorage.getItem(`subjects_${email}`)) || [];
+    }
+    function saveSubjects() {
+      localStorage.setItem(`subjects_${currentUser}`, JSON.stringify(subjects));
+    }
+
+    // Render subjects
+    function renderSubjects() {
+      const container = document.getElementById("subjects");
+      container.innerHTML = "";
+      subjects.forEach((sub, index) => {
+        const percent = sub.total > 0 ? ((sub.present / sub.total) * 100).toFixed(1) : "0";
+        const status = percent >= 75 ? '✅' : '⚠️';
+        const subjectDiv = document.createElement("div");
+        subjectDiv.className = "subject";
+
+        const infoHtml = `
+          <h3>${sub.name}</h3>
+          <p>Present: ${sub.present} / ${sub.total} (${percent}%) ${status}</p>
+        `;
+
+        subjectDiv.innerHTML = infoHtml;
+
+        // Buttons container
+        const btnGroup = document.createElement("div");
+        btnGroup.className = "btn-group";
+
+        // Present (+) button
+        const presentBtn = document.createElement("button");
+        presentBtn.className = "btn-attendance present";
+        presentBtn.title = "Mark Present";
+        presentBtn.textContent = "+";
+        presentBtn.addEventListener("click", () => markAttendance(index, "present"));
+
+        // Absent (−) button
+        const absentBtn = document.createElement("button");
+        absentBtn.className = "btn-attendance absent";
+        absentBtn.title = "Mark Absent";
+        absentBtn.textContent = "−";
+        absentBtn.addEventListener("click", () => markAttendance(index, "absent"));
+
+        // Edit button
+        const editBtn = document.createElement("button");
+        editBtn.className = "btn-attendance edit";
+        editBtn.title = "Edit Subject";
+        editBtn.textContent = "✎";
+        editBtn.style.backgroundColor = "#2980b9";
+        editBtn.style.boxShadow = "0 6px 12px rgba(41, 128, 185, 0.6)";
+        editBtn.addEventListener("click", () => editSubject(index));
+
+        // Delete button
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "btn-attendance delete";
+        deleteBtn.title = "Delete Subject";
+        deleteBtn.textContent = "🗑";
+        deleteBtn.addEventListener("click", () => deleteSubject(index));
+
+        btnGroup.appendChild(presentBtn);
+        btnGroup.appendChild(absentBtn);
+        btnGroup.appendChild(editBtn);
+        btnGroup.appendChild(deleteBtn);
+
+        subjectDiv.appendChild(btnGroup);
+
+        container.appendChild(subjectDiv);
+      });
+    }
+
+    // Attendance actions
+    function markAttendance(index, type) {
+      subjects[index].total++;
+      if (type === "present") {
+        subjects[index].present++;
+      }
+      saveSubjects();
+      renderSubjects();
+    }
+
+    function resetSubject(index) {
+      if (confirm("Are you sure you want to reset?")) {
+        subjects[index].total = 0;
+        subjects[index].present = 0;
+        saveSubjects();
+        renderSubjects();
+      }
+    }
+
+    function editSubject(index) {
+      const newName = prompt("Enter new subject name:", subjects[index].name);
+      if (newName && newName.trim() !== "") {
+        subjects[index].name = newName.trim();
+        saveSubjects();
+        renderSubjects();
+      }
+    }
+
+    function deleteSubject(index) {
+      if (confirm(`Delete subject "${subjects[index].name}"? This cannot be undone.`)) {
+        subjects.splice(index, 1);
+        saveSubjects();
+        renderSubjects();
+      }
+    }
+
+    // Add subject
+    document.getElementById("addSubjectBtn").addEventListener("click", () => {
+      const input = document.getElementById("subjectInput");
+      const name = input.value.trim();
+      if (name) {
+        subjects.push({ name, total: 0, present: 0 });
+        input.value = "";
+        saveSubjects();
+        renderSubjects();
+      }
+    });
+
+    // LOGIN
+    document.getElementById("loginBtn").addEventListener("click", () => {
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
+
+      if (!email || !password) {
+        alert("Please enter both email and password.");
+        return;
+      }
+
+      const storedPassword = localStorage.getItem(`password_${email}`);
+      if (!storedPassword) {
+        alert("User not found. Please sign up first.");
+        return;
+      }
+      if (storedPassword !== password) {
+        alert("Incorrect password.");
+        return;
+      }
+
+      // Successful login
+      currentUser = email;
+      localStorage.setItem("username", currentUser);
+      subjects = getUserSubjects(currentUser);
+      greeting.textContent = `Welcome, ${currentUser}!`;
+      showView(mainView);
+      renderSubjects();
+
+      // Clear login inputs
+      document.getElementById("loginEmail").value = "";
+      document.getElementById("loginPassword").value = "";
+    });
+
+    // SIGNUP
+    document.getElementById("signupBtn").addEventListener("click", () => {
+      const email = document.getElementById("signupEmail").value.trim();
+      const password = document.getElementById("signupPassword").value;
+
+      if (!email || !password) {
+        alert("Please enter both email and password.");
+        return;
+      }
+      if (localStorage.getItem(`password_${email}`)) {
+        alert("User already exists. Please login.");
+        return;
+      }
+      localStorage.setItem(`password_${email}`, password);
+      alert("Registration successful! Please login now.");
+      showView(loginView);
+
+      // Clear signup inputs
+      document.getElementById("signupEmail").value = "";
+      document.getElementById("signupPassword").value = "";
+    });
+
+    // LOGOUT
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("username");
+      currentUser = null;
+      subjects = [];
+      showView(loginView);
+    });
+
+    // On page load, check if user is logged in
+    if (currentUser) {
+      subjects = getUserSubjects(currentUser);
+      greeting.textContent = `Welcome, ${currentUser}!`;
+      showView(mainView);
+      renderSubjects();
+    } else {
+      showView(loginView);
+    }
+  </script>
+</body>
+</html>
