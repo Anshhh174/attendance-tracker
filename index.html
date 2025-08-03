@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -204,6 +204,62 @@
       transform: translateY(-2px);
     }
 
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+      animation: fade-in 0.3s forwards;
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 25px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 400px;
+      border-radius: 18px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      animation: slide-in 0.3s forwards;
+    }
+    .modal-content p {
+      margin: 0 0 20px;
+      font-size: 1.2em;
+    }
+    .modal-buttons {
+      display: flex;
+      justify-content: space-around;
+    }
+    .modal-buttons button {
+      padding: 10px 20px;
+      margin: 0 10px;
+      width: 100px;
+      font-size: 1em;
+      box-shadow: none;
+    }
+    .modal-buttons .confirm-btn {
+      background: #e74c3c;
+    }
+    .modal-buttons .confirm-btn:hover {
+      background: #c0392b;
+      transform: translateY(0);
+    }
+    .modal-buttons .cancel-btn {
+      background: #95a5a6;
+    }
+    .modal-buttons .cancel-btn:hover {
+      background: #7f8c8d;
+      transform: translateY(0);
+    }
+
+
     /* Responsive */
     @media (max-width: 520px) {
       .container {
@@ -232,6 +288,14 @@
         opacity: 1;
         transform: translateY(0);
       }
+    }
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slide-in {
+      from { transform: translateY(-50px); }
+      to { transform: translateY(0); }
     }
   </style>
 </head>
@@ -266,14 +330,151 @@
     <div class="subjects" id="subjects"></div>
   </div>
 
-  <script>
-    // Elements
+  <!-- Custom Modal for Alerts/Confirmations -->
+  <div id="customModal" class="modal">
+    <div class="modal-content">
+      <p id="modalMessage"></p>
+      <div class="modal-buttons">
+        <button id="modalConfirmBtn" class="confirm-btn" style="display:none;">OK</button>
+        <button id="modalCancelBtn" class="cancel-btn" style="display:none;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+
+    // --- Firebase Initialization ---
+    // Hardcoded config as a fallback in case environment variables are not present.
+    const userFirebaseConfig = {
+      apiKey: "AIzaSyBIAclpFBe5yBKrnCDueWIGMybRry1petU",
+      authDomain: "attendance-tracker-5ae43.firebaseapp.com",
+      projectId: "attendance-tracker-5ae43",
+      storageBucket: "attendance-tracker-5ae43.appspot.com",
+      messagingSenderId: "710590047788",
+      appId: "1:710590047788:web:45279be44a5e288d789389"
+    };
+
+    const firebaseConfig = typeof __firebase_config !== 'undefined' && __firebase_config !== ''
+      ? JSON.parse(__firebase_config)
+      : userFirebaseConfig;
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    let currentUser = null;
+    let subjects = [];
+
+    // --- Custom Modal Functions (replaces alert and confirm) ---
+    function showAlert(message) {
+      return new Promise(resolve => {
+        const modal = document.getElementById('customModal');
+        const messageElem = document.getElementById('modalMessage');
+        const confirmBtn = document.getElementById('modalConfirmBtn');
+        const cancelBtn = document.getElementById('modalCancelBtn');
+
+        messageElem.textContent = message;
+        confirmBtn.textContent = 'OK';
+        confirmBtn.style.display = 'block';
+        cancelBtn.style.display = 'none';
+
+        const handleConfirm = () => {
+          modal.style.display = 'none';
+          confirmBtn.removeEventListener('click', handleConfirm);
+          resolve(true);
+        };
+
+        confirmBtn.addEventListener('click', handleConfirm);
+        modal.style.display = 'block';
+      });
+    }
+
+    function showConfirm(message) {
+      return new Promise(resolve => {
+        const modal = document.getElementById('customModal');
+        const messageElem = document.getElementById('modalMessage');
+        const confirmBtn = document.getElementById('modalConfirmBtn');
+        const cancelBtn = document.getElementById('modalCancelBtn');
+
+        messageElem.textContent = message;
+        confirmBtn.textContent = 'Yes';
+        cancelBtn.textContent = 'No';
+        confirmBtn.style.display = 'block';
+        cancelBtn.style.display = 'block';
+
+        const handleConfirm = () => {
+          modal.style.display = 'none';
+          confirmBtn.removeEventListener('click', handleConfirm);
+          cancelBtn.removeEventListener('click', handleCancel);
+          resolve(true);
+        };
+
+        const handleCancel = () => {
+          modal.style.display = 'none';
+          confirmBtn.removeEventListener('click', handleConfirm);
+          cancelBtn.removeEventListener('click', handleCancel);
+          resolve(false);
+        };
+
+        confirmBtn.addEventListener('click', handleConfirm);
+        cancelBtn.addEventListener('click', handleCancel);
+        modal.style.display = 'block';
+      });
+    }
+
+    // --- Firestore Data Functions ---
+    // This function saves the current subjects array to Firestore for the logged-in user.
+    async function saveSubjects() {
+      if (!currentUser) return; // Don't save if no user is logged in
+      try {
+        const userDocRef = doc(db, `artifacts/${appId}/users`, currentUser.uid);
+        await setDoc(userDocRef, { subjects: subjects }, { merge: true });
+      } catch (e) {
+        console.error("Error saving subjects: ", e);
+        showAlert("Failed to save data. Please try again.");
+      }
+    }
+
+    // This function sets up a real-time listener for the user's subjects.
+    // It's the most efficient way to keep the UI in sync with the database.
+    function setupRealtimeListener() {
+      if (!currentUser) return;
+      const userDocRef = doc(db, `artifacts/${appId}/users`, currentUser.uid);
+      onSnapshot(userDocRef, (doc) => {
+        if (doc.exists()) {
+          subjects = doc.data().subjects || [];
+        } else {
+          subjects = [];
+        }
+        renderSubjects();
+      }, (error) => {
+        console.error("Error fetching real-time data: ", error);
+        showAlert("Error fetching data. Please refresh.");
+      });
+    }
+
+
+    // --- UI Rendering and Event Listeners ---
     const loginView = document.getElementById("loginView");
     const signupView = document.getElementById("signupView");
     const mainView = document.getElementById("mainView");
     const greeting = document.getElementById("greeting");
 
-    // Show views
     function showView(view) {
       loginView.style.display = "none";
       signupView.style.display = "none";
@@ -281,26 +482,17 @@
       view.style.display = "block";
     }
 
-    // Navigation links
     document.getElementById("goToSignup").addEventListener("click", () => showView(signupView));
     document.getElementById("goToLogin").addEventListener("click", () => showView(loginView));
 
-    // User data
-    let currentUser = localStorage.getItem("username");
-    let subjects = [];
-
-    // Utils
-    function getUserSubjects(email) {
-      return JSON.parse(localStorage.getItem(`subjects_${email}`)) || [];
-    }
-    function saveSubjects() {
-      localStorage.setItem(`subjects_${currentUser}`, JSON.stringify(subjects));
-    }
 
     // Render subjects
     function renderSubjects() {
       const container = document.getElementById("subjects");
       container.innerHTML = "";
+      if (subjects.length === 0) {
+          container.innerHTML = "<p style='text-align:center; color: #7f8c8d; font-style: italic;'>No subjects added yet.</p>";
+      }
       subjects.forEach((sub, index) => {
         const percent = sub.total > 0 ? ((sub.present / sub.total) * 100).toFixed(1) : "0";
         const status = percent >= 75 ? '✅' : '⚠️';
@@ -318,21 +510,18 @@
         const btnGroup = document.createElement("div");
         btnGroup.className = "btn-group";
 
-        // Present (+) button
         const presentBtn = document.createElement("button");
         presentBtn.className = "btn-attendance present";
         presentBtn.title = "Mark Present";
         presentBtn.textContent = "+";
         presentBtn.addEventListener("click", () => markAttendance(index, "present"));
 
-        // Absent (−) button
         const absentBtn = document.createElement("button");
         absentBtn.className = "btn-attendance absent";
         absentBtn.title = "Mark Absent";
         absentBtn.textContent = "−";
         absentBtn.addEventListener("click", () => markAttendance(index, "absent"));
 
-        // Edit button
         const editBtn = document.createElement("button");
         editBtn.className = "btn-attendance edit";
         editBtn.title = "Edit Subject";
@@ -341,7 +530,6 @@
         editBtn.style.boxShadow = "0 6px 12px rgba(41, 128, 185, 0.6)";
         editBtn.addEventListener("click", () => editSubject(index));
 
-        // Delete button
         const deleteBtn = document.createElement("button");
         deleteBtn.className = "btn-attendance delete";
         deleteBtn.title = "Delete Subject";
@@ -352,9 +540,7 @@
         btnGroup.appendChild(absentBtn);
         btnGroup.appendChild(editBtn);
         btnGroup.appendChild(deleteBtn);
-
         subjectDiv.appendChild(btnGroup);
-
         container.appendChild(subjectDiv);
       });
     }
@@ -366,36 +552,24 @@
         subjects[index].present++;
       }
       saveSubjects();
-      renderSubjects();
     }
 
-    function resetSubject(index) {
-      if (confirm("Are you sure you want to reset?")) {
-        subjects[index].total = 0;
-        subjects[index].present = 0;
-        saveSubjects();
-        renderSubjects();
-      }
-    }
-
-    function editSubject(index) {
+    async function editSubject(index) {
       const newName = prompt("Enter new subject name:", subjects[index].name);
       if (newName && newName.trim() !== "") {
         subjects[index].name = newName.trim();
         saveSubjects();
-        renderSubjects();
       }
     }
 
-    function deleteSubject(index) {
-      if (confirm(`Delete subject "${subjects[index].name}"? This cannot be undone.`)) {
+    async function deleteSubject(index) {
+      const result = await showConfirm(`Delete subject "${subjects[index].name}"? This cannot be undone.`);
+      if (result) {
         subjects.splice(index, 1);
         saveSubjects();
-        renderSubjects();
       }
     }
 
-    // Add subject
     document.getElementById("addSubjectBtn").addEventListener("click", () => {
       const input = document.getElementById("subjectInput");
       const name = input.value.trim();
@@ -403,125 +577,71 @@
         subjects.push({ name, total: 0, present: 0 });
         input.value = "";
         saveSubjects();
-        renderSubjects();
+      } else {
+        showAlert("Subject name cannot be empty.");
       }
     });
 
-    // LOGIN
-    // LOGIN
-document.getElementById("loginBtn").addEventListener("click", () => {
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value;
+    // --- Authentication Handlers ---
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
+      if (!email || !password) {
+        showAlert("Please enter both email and password.");
+        return;
+      }
 
-  if (!email || !password) {
-    alert("Please enter both email and password.");
-    return;
-  }
-
-  signInWithEmailAndPassword(auth, email, password)
-
-    .then((userCredential) => {
-      currentUser = userCredential.user.email;
-      localStorage.setItem("username", currentUser); // still needed for subject storage unless moved to Firebase DB
-      subjects = getUserSubjects(currentUser);
-      greeting.textContent = `Welcome, ${currentUser}!`;
-      showView(mainView);
-      renderSubjects();
-    })
-    .catch((error) => {
-      alert("Login failed: " + error.message);
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        // onAuthStateChanged will handle the rest
+      } catch (error) {
+        showAlert("Login failed: " + error.message);
+      }
     });
-});
 
+    document.getElementById("signupBtn").addEventListener("click", async () => {
+      const email = document.getElementById("signupEmail").value.trim();
+      const password = document.getElementById("signupPassword").value;
+      if (!email || !password) {
+        showAlert("Please enter both email and password.");
+        return;
+      }
 
-    // SIGNUP
-    document.getElementById("signupBtn").addEventListener("click", () => {
-     const email = document.getElementById("signupEmail").value.trim();
-    const password = document.getElementById("signupPassword").value;
-
-     if (!email || !password) {
-     alert("Please enter both email and password.");
-     return;
-    }
-
-    createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      alert("Registration successful! Please login now.");
-      showView(loginView);
-    })
-    .catch((error) => {
-      if (error.code === "auth/email-already-in-use") {
-  alert("This email is already registered. Try logging in instead.");
-} else {
-  alert("Error: " + error.message);
-}
-
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        showAlert("Registration successful! Please login now.");
+        showView(loginView);
+      } catch (error) {
+        if (error.code === "auth/email-already-in-use") {
+          showAlert("This email is already registered. Try logging in instead.");
+        } else {
+          showAlert("Error: " + error.message);
+        }
+      }
     });
-   });
 
 
-    // LOGOUT
-     document.getElementById("logoutBtn").addEventListener("click", () => {
-    signOut(auth).then(() => {
-    localStorage.removeItem("username");
-    currentUser = null;
-    subjects = [];
-    showView(loginView);
-  });
-});
-
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      signOut(auth).then(() => {
+        currentUser = null;
+        subjects = [];
+        showView(loginView);
+      });
+    });
 
     // On page load, check if user is logged in
-    onAuthStateChanged(auth, (user) => {
-  if (user) {
-    currentUser = user.email;
-    localStorage.setItem("username", currentUser);
-    subjects = getUserSubjects(currentUser);
-    greeting.textContent = `Welcome, ${currentUser}!`;
-    showView(mainView);
-    renderSubjects();
-  } else {
-    showView(loginView);
-  }
-});
-
-
-    
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        greeting.textContent = `Welcome, ${currentUser.email}!`;
+        showView(mainView);
+        // Set up a listener for real-time updates from Firestore
+        setupRealtimeListener();
+      } else {
+        currentUser = null;
+        showView(loginView);
+      }
+    });
   </script>
-  
-  <script type="module">
-  // Import the functions you need from the SDKs
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-  import {
-    getAuth,
-    onAuthStateChanged,
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    signOut
-  } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
-  // Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyBIAclpFBe5yBKrnCDueWIGMybRry1petU",
-    authDomain: "attendance-tracker-5ae43.firebaseapp.com",
-    projectId: "attendance-tracker-5ae43",
-    storageBucket: "attendance-tracker-5ae43.appspot.com",  // fixed `.app` typo
-    messagingSenderId: "710590047788",
-    appId: "1:710590047788:web:45279be44a5e288d789389"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-
-  // Expose auth to global scope so your main script can use it
-  window.auth = auth;
-  window.onAuthStateChanged = onAuthStateChanged;
-  window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
-  window.signInWithEmailAndPassword = signInWithEmailAndPassword;
-  window.signOut = signOut;
-</script>
-
-
 </body>
 </html>
