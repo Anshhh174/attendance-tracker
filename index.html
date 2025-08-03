@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Attendance Tracker - SPA</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     /* Reset and base */
     * {
@@ -12,47 +12,85 @@
       transition: all 0.3s ease;
     }
     body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      font-family: 'Inter', sans-serif;
       margin: 0;
-      padding: 20px;
+      padding: 0;
       min-height: 100vh;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       color: #2c3e50;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      animation: gradient-background 15s ease infinite;
+      overflow-x: hidden;
     }
+
+    @keyframes gradient-background {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
     .container {
-      background: #fff;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
       padding: 40px 35px 50px;
       border-radius: 18px;
       width: 90%;
       max-width: 480px;
-      box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
       animation: fadeIn 0.6s ease-in-out;
+      display: none;
+      margin-top: 20px;
+      align-self: center;
     }
+    .main-container {
+        max-width: 650px;
+    }
+
     h1, h2 {
       text-align: center;
       margin-bottom: 25px;
       font-weight: 700;
       letter-spacing: 1.2px;
+      color: #fff;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
     }
+    h1 {
+      font-size: 2.5em;
+    }
+    .home-greeting {
+        text-align: left;
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: #fff;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    }
+
     input[type="text"],
     input[type="password"] {
       width: 100%;
       padding: 14px 18px;
       margin: 14px 0;
       border-radius: 12px;
-      border: 2px solid #d1d8e0;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.3);
       font-size: 1.1em;
       font-weight: 500;
-      color: #34495e;
+      color: #fff;
       box-shadow: inset 2px 2px 5px rgba(0,0,0,0.05);
+    }
+    input[type="text"]::placeholder,
+    input[type="password"]::placeholder {
+      color: #e0e0e0;
     }
     input[type="text"]:focus,
     input[type="password"]:focus {
-      border-color: #667eea;
-      box-shadow: 0 0 8px #667eea;
+      border-color: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
       outline: none;
     }
     button {
@@ -66,14 +104,67 @@
       transition: all 0.3s ease;
       box-shadow: 0 6px 15px rgba(102, 126, 234, 0.6);
       color: white;
+      background: linear-gradient(135deg, #667eea, #764ba2);
     }
     button:hover {
       transform: translateY(-2px);
       box-shadow: 0 10px 25px rgba(102, 126, 234, 0.9);
     }
+    
+    .navbar {
+      width: 90%;
+      max-width: 650px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 15px 30px;
+      border-radius: 18px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .navbar-brand {
+      font-size: 1.5em;
+      font-weight: 700;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: 1px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    }
+    .navbar-links {
+      display: flex;
+      gap: 20px;
+    }
+    .navbar-link {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1em;
+      position: relative;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    }
+    .navbar-link::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 2px;
+      background: #fff;
+      bottom: -5px;
+      left: 0;
+      transform: scaleX(0);
+      transform-origin: bottom right;
+      transition: transform 0.3s ease;
+    }
+    .navbar-link:hover::after, .navbar-link.active::after {
+      transform: scaleX(1);
+      transform-origin: bottom left;
+    }
+
 
     /* Specific buttons */
-    #loginBtn, #signupBtn, #addSubjectBtn {
+    #loginBtn, #signupBtn, #addSubjectBtn, #updateProfileBtn {
       width: 100%;
       background: linear-gradient(135deg, #667eea, #764ba2);
       padding: 14px;
@@ -81,9 +172,6 @@
       margin-top: 25px;
     }
     #logoutBtn {
-      width: auto;
-      float: right;
-      margin-bottom: 15px;
       background: #f39c12;
       box-shadow: 0 5px 15px rgba(243, 156, 18, 0.7);
       padding: 10px 22px;
@@ -99,12 +187,13 @@
       text-align: center;
       margin-top: 18px;
       font-size: 1em;
-      color: #764ba2;
+      color: #fff;
       text-decoration: underline;
       cursor: pointer;
       user-select: none;
       font-weight: 600;
       letter-spacing: 0.7px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
     }
     .subject-form {
       margin-top: 30px;
@@ -114,18 +203,6 @@
     .subject-form input {
       flex-grow: 1;
       margin: 0;
-      font-size: 1.1em;
-      font-weight: 500;
-      padding: 12px 16px;
-      border-radius: 12px;
-      border: 2px solid #d1d8e0;
-      box-shadow: inset 2px 2px 6px rgba(0,0,0,0.05);
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-    .subject-form input:focus {
-      border-color: #667eea;
-      box-shadow: 0 0 10px #667eea;
-      outline: none;
     }
     .subjects {
       margin-top: 28px;
@@ -134,28 +211,40 @@
       margin: 12px 0;
       padding: 15px 20px;
       border-radius: 16px;
-      background: #f6f8fc;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(5px);
       box-shadow: 0 5px 15px rgba(118, 75, 162, 0.1);
       display: flex;
       flex-direction: column;
       gap: 10px;
       transition: box-shadow 0.3s ease;
+      position: relative;
+      cursor: grab;
     }
     .subject:hover {
       box-shadow: 0 10px 30px rgba(118, 75, 162, 0.15);
     }
+    .subject.dragging {
+      opacity: 0.5;
+      transform: rotate(2deg) scale(1.05);
+      box-shadow: 0 15px 30px rgba(118, 75, 162, 0.3);
+      cursor: grabbing;
+    }
+
     .subject h3 {
       margin: 0;
       font-weight: 700;
       font-size: 1.25em;
-      color: #5b2e7e;
+      color: #fff;
       letter-spacing: 0.7px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
     }
     .subject p {
       font-weight: 600;
-      color: #34495e;
+      color: #e0e0e0;
       margin: 0 0 10px;
       font-size: 1em;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
     }
 
     /* Attendance buttons */
@@ -178,6 +267,7 @@
       user-select: none;
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
       transition: all 0.3s ease;
+      color: white;
     }
     .btn-attendance.present {
       background-color: #27ae60;
@@ -203,6 +293,34 @@
       box-shadow: 0 10px 20px rgba(127, 140, 141, 0.85);
       transform: translateY(-2px);
     }
+    .export-btn {
+        margin-top: 20px;
+        background: #3498db;
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.7);
+        padding: 10px 22px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        border-radius: 12px;
+    }
+
+    /* Progress bar styles */
+    .progress-container {
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+    .progress-bar {
+        height: 10px;
+        width: 0%;
+        transition: width 0.5s ease-in-out;
+    }
+    .progress-bar.green { background-color: #27ae60; }
+    .progress-bar.yellow { background-color: #f39c12; }
+    .progress-bar.red { background-color: #c0392b; }
+
 
     /* Modal styles */
     .modal {
@@ -218,10 +336,11 @@
       animation: fade-in 0.3s forwards;
     }
     .modal-content {
-      background-color: #fefefe;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
       margin: 15% auto;
       padding: 25px;
-      border: 1px solid #888;
       width: 80%;
       max-width: 400px;
       border-radius: 18px;
@@ -232,6 +351,7 @@
     .modal-content p {
       margin: 0 0 20px;
       font-size: 1.2em;
+      color: #34495e;
     }
     .modal-buttons {
       display: flex;
@@ -259,6 +379,18 @@
       transform: translateY(0);
     }
 
+    /* Profile form specific styles */
+    .profile-form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .profile-form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #fff;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    }
 
     /* Responsive */
     @media (max-width: 520px) {
@@ -300,8 +432,21 @@
   </style>
 </head>
 <body>
+  
+  <!-- Single Navigation Bar to rule them all -->
+  <div class="navbar" id="mainNavbar">
+    <a href="#" class="navbar-brand" id="mainBrandLink">Attendance Tracker</a>
+    <div class="navbar-links" id="mainNavLinks">
+      <a href="#" class="navbar-link" id="homeLink" style="display: none;">Home</a>
+      <a href="#" class="navbar-link" id="profileLink" style="display: none;">Profile</a>
+      <a href="#" class="navbar-link" id="aboutLink">About</a>
+      <a href="#" class="navbar-link" id="contactLink">Contact Us</a>
+      <button id="logoutBtn" style="display: none;">Logout</button>
+    </div>
+  </div>
+
   <!-- LOGIN VIEW -->
-  <div class="container" id="loginView">
+  <div class="container" id="loginView" style="display: block;">
     <h2>Login</h2>
     <input type="text" id="loginEmail" placeholder="Email" autocomplete="username" />
     <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" />
@@ -310,24 +455,59 @@
   </div>
 
   <!-- SIGNUP VIEW -->
-  <div class="container" id="signupView" style="display:none;">
+  <div class="container" id="signupView">
     <h2>Sign Up</h2>
     <input type="text" id="signupEmail" placeholder="Email" autocomplete="username" />
     <input type="password" id="signupPassword" placeholder="Password" autocomplete="new-password" />
     <button id="signupBtn">Register</button>
     <div class="link" id="goToLogin">Already have an account? Login</div>
   </div>
-
-  <!-- MAIN ATTENDANCE VIEW -->
-  <div class="container" id="mainView" style="display:none; max-width: 650px;">
-    <button id="logoutBtn">Logout</button>
-    <h1>Attendance Tracker</h1>
-    <div id="greeting"></div>
+  
+  <!-- HOME VIEW - Displayed after login -->
+  <div class="container main-container" id="homeView">
+    <h2 class="home-greeting">Welcome, <span id="userName"></span>!</h2>
+    <h1>Your Subjects</h1>
     <div class="subject-form">
       <input type="text" id="subjectInput" placeholder="Enter subject name" />
       <button id="addSubjectBtn">Add Subject</button>
     </div>
     <div class="subjects" id="subjects"></div>
+    <button id="exportDataBtn" class="export-btn">Export as CSV</button>
+  </div>
+
+  <!-- PROFILE VIEW -->
+  <div class="container" id="profileView">
+      <h2>Edit Profile</h2>
+      <div class="profile-form-group">
+        <label for="profileName">Name:</label>
+        <input type="text" id="profileName" placeholder="Enter your name" />
+      </div>
+      <div class="profile-form-group">
+        <label for="profileEmail">Email:</label>
+        <input type="text" id="profileEmail" disabled />
+      </div>
+      <div class="profile-form-group">
+        <label for="profilePassword">New Password:</label>
+        <input type="password" id="profilePassword" placeholder="Leave blank to keep current password" />
+      </div>
+      <button id="updateProfileBtn">Save Changes</button>
+  </div>
+
+  <!-- ABOUT VIEW -->
+  <div class="container" id="aboutView">
+    <h1>About Attendance Tracker</h1>
+    <p>This is a simple single-page application to help you track your attendance for various subjects. Log in to your account and your data will be automatically synced across all your devices.</p>
+    <p>Feel free to add new subjects, mark your attendance, and keep an eye on your attendance percentage to make sure you're on track!</p>
+    <p>This application is powered by Firebase for secure user authentication and real-time data storage.</p>
+  </div>
+
+  <!-- CONTACT VIEW -->
+  <div class="container" id="contactView">
+    <h1>Contact Us</h1>
+    <p>If you have any questions, feedback, or issues, please don't hesitate to reach out to us.</p>
+    <p><strong>Email:</strong> capes900@gmail.com</p>
+    <p><strong>Phone:</strong> +91 9022294053</p>
+    <p>We aim to respond to all inquiries within 48 hours.</p>
   </div>
 
   <!-- Custom Modal for Alerts/Confirmations -->
@@ -348,7 +528,9 @@
       onAuthStateChanged,
       createUserWithEmailAndPassword,
       signInWithEmailAndPassword,
-      signOut
+      signOut,
+      updateProfile,
+      updatePassword
     } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
     import {
       getFirestore,
@@ -436,6 +618,53 @@
         modal.style.display = 'block';
       });
     }
+    
+    function showPrompt(message, defaultValue = '') {
+      return new Promise(resolve => {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = defaultValue;
+        input.style.marginTop = '10px';
+        input.style.marginBottom = '20px';
+        input.style.padding = '8px';
+        input.style.border = '1px solid #ccc';
+        input.style.borderRadius = '5px';
+        input.style.width = '100%';
+        input.style.color = '#000'; // Make text color dark
+        input.style.backgroundColor = '#fefefe'; // Make background white
+        input.focus();
+
+        const modal = document.getElementById('customModal');
+        const messageElem = document.getElementById('modalMessage');
+        const confirmBtn = document.getElementById('modalConfirmBtn');
+        const cancelBtn = document.getElementById('modalCancelBtn');
+
+        messageElem.textContent = message;
+        messageElem.appendChild(input);
+        confirmBtn.textContent = 'OK';
+        cancelBtn.textContent = 'Cancel';
+        confirmBtn.style.display = 'block';
+        cancelBtn.style.display = 'block';
+        
+        const handleConfirm = () => {
+          modal.style.display = 'none';
+          confirmBtn.removeEventListener('click', handleConfirm);
+          cancelBtn.removeEventListener('click', handleCancel);
+          resolve(input.value);
+        };
+
+        const handleCancel = () => {
+          modal.style.display = 'none';
+          confirmBtn.removeEventListener('click', handleConfirm);
+          cancelBtn.removeEventListener('click', handleCancel);
+          resolve(null);
+        };
+
+        confirmBtn.addEventListener('click', handleConfirm);
+        cancelBtn.addEventListener('click', handleCancel);
+        modal.style.display = 'block';
+      });
+    }
 
     // --- Firestore Data Functions ---
     // This function saves the current subjects array to Firestore for the logged-in user.
@@ -472,18 +701,145 @@
     // --- UI Rendering and Event Listeners ---
     const loginView = document.getElementById("loginView");
     const signupView = document.getElementById("signupView");
-    const mainView = document.getElementById("mainView");
-    const greeting = document.getElementById("greeting");
+    const homeView = document.getElementById("homeView");
+    const profileView = document.getElementById("profileView");
+    const aboutView = document.getElementById("aboutView");
+    const contactView = document.getElementById("contactView");
+    const userName = document.getElementById("userName");
+    
+    const mainNavbar = document.getElementById("mainNavbar");
+    const homeLink = document.getElementById("homeLink");
+    const profileLink = document.getElementById("profileLink");
+    const aboutLink = document.getElementById("aboutLink");
+    const contactLink = document.getElementById("contactLink");
+    const mainBrandLink = document.getElementById("mainBrandLink");
+    const logoutBtn = document.getElementById("logoutBtn");
 
-    function showView(view) {
-      loginView.style.display = "none";
-      signupView.style.display = "none";
-      mainView.style.display = "none";
-      view.style.display = "block";
+    const views = {
+      login: loginView,
+      signup: signupView,
+      home: homeView,
+      profile: profileView,
+      about: aboutView,
+      contact: contactView
+    };
+
+    function showView(viewName) {
+      Object.values(views).forEach(view => {
+        view.style.display = 'none';
+      });
+      views[viewName].style.display = 'block';
+
+      // Update visibility of links based on login status and current view
+      if (!currentUser) {
+        homeLink.style.display = 'none';
+        profileLink.style.display = 'none';
+        logoutBtn.style.display = 'none';
+      } else {
+        homeLink.style.display = 'block';
+        profileLink.style.display = 'block';
+        logoutBtn.style.display = 'block';
+      }
+      
+      // Update active state for nav links
+      document.querySelectorAll('.navbar-link').forEach(link => {
+        link.classList.remove('active');
+      });
+      if (viewName === 'home') {
+          homeLink.classList.add('active');
+      } else if (viewName === 'profile') {
+          profileLink.classList.add('active');
+      } else if (viewName === 'about') {
+          aboutLink.classList.add('active');
+      } else if (viewName === 'contact') {
+          contactLink.classList.add('active');
+      }
     }
 
-    document.getElementById("goToSignup").addEventListener("click", () => showView(signupView));
-    document.getElementById("goToLogin").addEventListener("click", () => showView(loginView));
+    // Event listeners for page navigation
+    mainBrandLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (currentUser) {
+        showView('home');
+      } else {
+        showView('login');
+      }
+    });
+
+    homeLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      showView('home');
+    });
+
+    profileLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      showView('profile');
+      if (currentUser) {
+        document.getElementById('profileName').value = currentUser.displayName || '';
+        document.getElementById('profileEmail').value = currentUser.email || '';
+      }
+    });
+
+    aboutLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      showView('about');
+    });
+    
+    contactLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        showView('contact');
+    });
+
+    document.getElementById("goToSignup").addEventListener("click", () => showView('signup'));
+    document.getElementById("goToLogin").addEventListener("click", () => showView('login'));
+
+    // --- Drag and Drop Logic ---
+    let draggedSubject = null;
+    const subjectsContainer = document.getElementById("subjects");
+
+    subjectsContainer.addEventListener('dragstart', (e) => {
+      draggedSubject = e.target;
+      e.target.classList.add('dragging');
+    });
+
+    subjectsContainer.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      const afterElement = getDragAfterElement(subjectsContainer, e.clientY);
+      const draggable = document.querySelector('.dragging');
+      if (afterElement == null) {
+        subjectsContainer.appendChild(draggable);
+      } else {
+        subjectsContainer.insertBefore(draggable, afterElement);
+      }
+    });
+
+    subjectsContainer.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const newOrder = Array.from(subjectsContainer.children).map(node => {
+        const index = node.dataset.index;
+        return subjects[index];
+      });
+      subjects = newOrder;
+      saveSubjects();
+      renderSubjects(); // Re-render to update data-index attributes
+      if (draggedSubject) {
+        draggedSubject.classList.remove('dragging');
+      }
+      draggedSubject = null;
+    });
+
+    function getDragAfterElement(container, y) {
+      const draggableElements = [...container.querySelectorAll('.subject:not(.dragging)')];
+      return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+          return { offset: offset, element: child };
+        } else {
+          return closest;
+        }
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
 
 
     // Render subjects
@@ -491,17 +847,24 @@
       const container = document.getElementById("subjects");
       container.innerHTML = "";
       if (subjects.length === 0) {
-          container.innerHTML = "<p style='text-align:center; color: #7f8c8d; font-style: italic;'>No subjects added yet.</p>";
+          container.innerHTML = "<p style='text-align:center; color: #fff; font-style: italic;'>No subjects added yet.</p>";
       }
       subjects.forEach((sub, index) => {
         const percent = sub.total > 0 ? ((sub.present / sub.total) * 100).toFixed(1) : "0";
         const status = percent >= 75 ? '✅' : '⚠️';
+        const progressClass = percent >= 75 ? 'green' : (percent >= 50 ? 'yellow' : 'red');
+
         const subjectDiv = document.createElement("div");
         subjectDiv.className = "subject";
+        subjectDiv.draggable = true;
+        subjectDiv.dataset.index = index;
 
         const infoHtml = `
           <h3>${sub.name}</h3>
           <p>Present: ${sub.present} / ${sub.total} (${percent}%) ${status}</p>
+          <div class="progress-container">
+            <div class="progress-bar ${progressClass}" style="width: ${percent}%;"></div>
+          </div>
         `;
 
         subjectDiv.innerHTML = infoHtml;
@@ -555,7 +918,7 @@
     }
 
     async function editSubject(index) {
-      const newName = prompt("Enter new subject name:", subjects[index].name);
+      const newName = await showPrompt("Enter new subject name:", subjects[index].name);
       if (newName && newName.trim() !== "") {
         subjects[index].name = newName.trim();
         saveSubjects();
@@ -580,6 +943,30 @@
       } else {
         showAlert("Subject name cannot be empty.");
       }
+    });
+
+    // Export Data to CSV
+    document.getElementById('exportDataBtn').addEventListener('click', () => {
+      if (subjects.length === 0) {
+        showAlert("No subjects to export.");
+        return;
+      }
+      const header = "Subject,Present,Total,Percentage\n";
+      const csvContent = subjects.map(s => {
+        const percent = s.total > 0 ? ((s.present / s.total) * 100).toFixed(1) : "0";
+        return `${s.name},${s.present},${s.total},${percent}%`;
+      }).join('\n');
+
+      const fullCsv = header + csvContent;
+      const blob = new Blob([fullCsv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "attendance_data.csv");
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     });
 
     // --- Authentication Handlers ---
@@ -610,7 +997,7 @@
       try {
         await createUserWithEmailAndPassword(auth, email, password);
         showAlert("Registration successful! Please login now.");
-        showView(loginView);
+        showView('login');
       } catch (error) {
         if (error.code === "auth/email-already-in-use") {
           showAlert("This email is already registered. Try logging in instead.");
@@ -620,12 +1007,44 @@
       }
     });
 
+    // Handle Profile Updates
+    document.getElementById("updateProfileBtn").addEventListener("click", async () => {
+        const user = auth.currentUser;
+        if (!user) {
+            showAlert("You must be logged in to update your profile.");
+            return;
+        }
 
-    document.getElementById("logoutBtn").addEventListener("click", () => {
+        const newName = document.getElementById('profileName').value.trim();
+        const newPassword = document.getElementById('profilePassword').value;
+
+        if (newName) {
+            try {
+                await updateProfile(user, { displayName: newName });
+                showAlert("Profile name updated successfully!");
+                userName.textContent = newName;
+            } catch (error) {
+                showAlert("Failed to update name: " + error.message);
+            }
+        }
+        
+        if (newPassword) {
+            try {
+                await updatePassword(user, newPassword);
+                showAlert("Password updated successfully!");
+                document.getElementById('profilePassword').value = ''; // Clear the password field
+            } catch (error) {
+                showAlert("Failed to update password: " + error.message);
+            }
+        }
+    });
+
+
+    logoutBtn.addEventListener("click", () => {
       signOut(auth).then(() => {
         currentUser = null;
         subjects = [];
-        showView(loginView);
+        showView('login');
       });
     });
 
@@ -633,13 +1052,12 @@
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
-        greeting.textContent = `Welcome, ${currentUser.email}!`;
-        showView(mainView);
-        // Set up a listener for real-time updates from Firestore
+        userName.textContent = user.displayName || user.email;
+        showView('home');
         setupRealtimeListener();
       } else {
         currentUser = null;
-        showView(loginView);
+        showView('login');
       }
     });
   </script>
