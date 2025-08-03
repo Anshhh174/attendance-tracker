@@ -392,6 +392,59 @@
       text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
     }
 
+    /* Hamburger Menu */
+    .hamburger-menu {
+        display: none;
+        flex-direction: column;
+        cursor: pointer;
+        justify-content: space-around;
+        width: 30px;
+        height: 25px;
+        z-index: 10;
+    }
+    .hamburger-menu span {
+        display: block;
+        height: 3px;
+        width: 100%;
+        background: #fff;
+        border-radius: 5px;
+    }
+    .mobile-menu-links {
+        display: none;
+        position: fixed;
+        top: 0;
+        right: -300px; /* Hidden off-screen */
+        height: 100%;
+        width: 250px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(15px);
+        box-shadow: -2px 0 10px rgba(0,0,0,0.2);
+        padding: 80px 30px 20px;
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+        z-index: 9;
+    }
+    .mobile-menu-links.show {
+        display: flex;
+        right: 0;
+    }
+    .mobile-menu-links .navbar-link, .mobile-menu-links #logoutBtn {
+        font-size: 1.2em;
+        color: #5b2e7e;
+        text-shadow: none;
+        width: 100%;
+        text-align: left;
+        padding: 10px 0;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(91, 46, 126, 0.2);
+    }
+    .mobile-menu-links #logoutBtn {
+        margin-top: 20px;
+        width: 100%;
+    }
+
+
     /* Responsive */
     @media (max-width: 520px) {
       .container {
@@ -417,10 +470,10 @@
           font-size: 1.2em;
       }
       .navbar-links {
-          gap: 10px;
+          display: none;
       }
-      .subject .btn-group {
-          flex-wrap: wrap;
+      .hamburger-menu {
+          display: flex;
       }
     }
 
@@ -456,7 +509,22 @@
       <a href="#" class="navbar-link" id="contactLink">Contact Us</a>
       <button id="logoutBtn" style="display: none;">Logout</button>
     </div>
+    <div class="hamburger-menu" id="hamburgerMenu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
   </div>
+
+  <!-- Mobile Menu Links (Hidden by default) -->
+  <div class="mobile-menu-links" id="mobileMenuLinks">
+      <a href="#" class="navbar-link" id="homeLinkMobile" style="display: none;">Home</a>
+      <a href="#" class="navbar-link" id="profileLinkMobile" style="display: none;">Profile</a>
+      <a href="#" class="navbar-link" id="aboutLinkMobile">About</a>
+      <a href="#" class="navbar-link" id="contactLinkMobile">Contact Us</a>
+      <button id="logoutBtnMobile" style="display: none;">Logout</button>
+  </div>
+
 
   <!-- LOGIN VIEW -->
   <div class="container" id="loginView" style="display: block;">
@@ -643,8 +711,8 @@
         input.style.border = '1px solid #ccc';
         input.style.borderRadius = '5px';
         input.style.width = '100%';
-        input.style.color = '#000'; // Make text color dark
-        input.style.backgroundColor = '#fefefe'; // Make background white
+        input.style.color = '#000';
+        input.style.backgroundColor = '#fefefe';
         input.focus();
 
         const modal = document.getElementById('customModal');
@@ -682,7 +750,7 @@
     // --- Firestore Data Functions ---
     // This function saves the current subjects array to Firestore for the logged-in user.
     async function saveSubjects() {
-      if (!currentUser) return; // Don't save if no user is logged in
+      if (!currentUser) return;
       try {
         const userDocRef = doc(db, `artifacts/${appId}/users`, currentUser.uid);
         await setDoc(userDocRef, { subjects: subjects }, { merge: true });
@@ -721,12 +789,22 @@
     const userName = document.getElementById("userName");
     
     const mainNavbar = document.getElementById("mainNavbar");
+    const mainNavLinks = document.getElementById("mainNavLinks");
     const homeLink = document.getElementById("homeLink");
     const profileLink = document.getElementById("profileLink");
     const aboutLink = document.getElementById("aboutLink");
     const contactLink = document.getElementById("contactLink");
     const mainBrandLink = document.getElementById("mainBrandLink");
     const logoutBtn = document.getElementById("logoutBtn");
+
+    const hamburgerMenu = document.getElementById('hamburgerMenu');
+    const mobileMenuLinks = document.getElementById('mobileMenuLinks');
+    const homeLinkMobile = document.getElementById('homeLinkMobile');
+    const profileLinkMobile = document.getElementById('profileLinkMobile');
+    const aboutLinkMobile = document.getElementById('aboutLinkMobile');
+    const contactLinkMobile = document.getElementById('contactLinkMobile');
+    const logoutBtnMobile = document.getElementById('logoutBtnMobile');
+
 
     const views = {
       login: loginView,
@@ -748,10 +826,16 @@
         homeLink.style.display = 'none';
         profileLink.style.display = 'none';
         logoutBtn.style.display = 'none';
+        homeLinkMobile.style.display = 'none';
+        profileLinkMobile.style.display = 'none';
+        logoutBtnMobile.style.display = 'none';
       } else {
         homeLink.style.display = 'block';
         profileLink.style.display = 'block';
         logoutBtn.style.display = 'block';
+        homeLinkMobile.style.display = 'block';
+        profileLinkMobile.style.display = 'block';
+        logoutBtnMobile.style.display = 'block';
       }
       
       // Update active state for nav links
@@ -760,14 +844,31 @@
       });
       if (viewName === 'home') {
           homeLink.classList.add('active');
+          homeLinkMobile.classList.add('active');
       } else if (viewName === 'profile') {
           profileLink.classList.add('active');
+          profileLinkMobile.classList.add('active');
       } else if (viewName === 'about') {
           aboutLink.classList.add('active');
+          aboutLinkMobile.classList.add('active');
       } else if (viewName === 'contact') {
           contactLink.classList.add('active');
+          contactLinkMobile.classList.add('active');
       }
     }
+    
+    // Toggle mobile menu
+    hamburgerMenu.addEventListener('click', () => {
+      mobileMenuLinks.classList.toggle('show');
+    });
+
+    // Close mobile menu on link click
+    mobileMenuLinks.querySelectorAll('a, button').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenuLinks.classList.remove('show');
+      });
+    });
+
 
     // Event listeners for page navigation
     mainBrandLink.addEventListener("click", (e) => {
@@ -792,6 +893,20 @@
         document.getElementById('profileEmail').value = currentUser.email || '';
       }
     });
+    
+    homeLinkMobile.addEventListener("click", (e) => {
+      e.preventDefault();
+      showView('home');
+    });
+    
+    profileLinkMobile.addEventListener("click", (e) => {
+      e.preventDefault();
+      showView('profile');
+      if (currentUser) {
+        document.getElementById('profileName').value = currentUser.displayName || '';
+        document.getElementById('profileEmail').value = currentUser.email || '';
+      }
+    });
 
     aboutLink.addEventListener("click", (e) => {
       e.preventDefault();
@@ -799,6 +914,16 @@
     });
     
     contactLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        showView('contact');
+    });
+    
+    aboutLinkMobile.addEventListener("click", (e) => {
+      e.preventDefault();
+      showView('about');
+    });
+
+    contactLinkMobile.addEventListener("click", (e) => {
         e.preventDefault();
         showView('contact');
     });
@@ -1045,7 +1170,7 @@
             try {
                 await updatePassword(user, newPassword);
                 showAlert("Password updated successfully!");
-                document.getElementById('profilePassword').value = ''; // Clear the password field
+                document.getElementById('profilePassword').value = '';
             } catch (error) {
                 showAlert("Failed to update password: " + error.message);
             }
@@ -1060,6 +1185,15 @@
         showView('login');
       });
     });
+    
+    logoutBtnMobile.addEventListener("click", () => {
+      signOut(auth).then(() => {
+        currentUser = null;
+        subjects = [];
+        showView('login');
+      });
+    });
+
 
     // On page load, check if user is logged in
     onAuthStateChanged(auth, async (user) => {
